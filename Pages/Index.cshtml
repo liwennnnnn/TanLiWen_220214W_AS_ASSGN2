@@ -1,0 +1,37 @@
+﻿@page
+@using System.Security.Claims
+@using Microsoft.AspNetCore.DataProtection
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h2 class="display-4">Welcome to Ace Job Agency</h2>
+    <p>Seize Your Dream Job.</p>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p>Welcome, @User.Identity.Name!</p>
+        <p>Email: @User.FindFirst(ClaimTypes.Email)?.Value</p>
+        <p>First Name: @User.FindFirst(ClaimTypes.GivenName)?.Value</p>
+        <p>Last Name: @User.FindFirst(ClaimTypes.Surname)?.Value</p>
+        <p>Gender: @User.FindFirst(ClaimTypes.Gender)?.Value</p>
+
+        @if (User.HasClaim(c => c.Type == "NRIC"))
+        {
+            var nricClaim = User.FindFirst("NRIC");
+            var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
+            var protector = dataProtectionProvider.CreateProtector("MySecretKey");
+            var decryptedNRIC = protector.Unprotect(nricClaim.Value);
+
+            <p>NRIC: @decryptedNRIC</p>
+        }
+
+        <p>Date of Birth: @User.FindFirst("DateOfBirth")?.Value</p>
+    }
+    else
+    {
+        <p>You are not logged in.</p>
+    }
+</div>
